@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>👑 Premium Restoran</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+    color: #f5d27a;
+}
+
+/* HEADER */
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: rgba(0,0,0,0.9);
+    border-bottom: 2px solid gold;
+}
+
+/* BUTTON */
+button {
+    padding: 8px 12px;
+    border: none;
+    background: gold;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: 0.3s;
+}
+button:hover {
+    transform: scale(1.1);
+    background: orange;
+}
+
+/* CONTAINER */
+.container {
+    padding: 20px;
+}
+
+/* CATEGORY */
+.category h2 {
+    border-left: 5px solid gold;
+    padding-left: 10px;
+}
+
+/* CARD */
+.card {
+    display: flex;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid gold;
+    border-radius: 15px;
+    margin: 15px 0;
+    overflow: hidden;
+    transition: 0.4s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px gold;
+}
+
+/* IMAGE */
+.card img {
+    width: 120px;
+    object-fit: cover;
+}
+
+/* CONTENT */
+.card-content {
+    padding: 10px;
+    flex: 1;
+}
+
+/* PRICE */
+.price {
+    color: lightgreen;
+    font-weight: bold;
+}
+
+/* INPUT */
+input, textarea {
+    width: 100%;
+    margin: 5px 0;
+    border-radius: 5px;
+    border: none;
+    padding: 5px;
+}
+
+/* POINTS */
+.points {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 10px;
+}
+
+/* FADE IN */
+.fade-in {
+    animation: fadeIn 1s ease-in;
+}
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(20px);}
+    to {opacity:1; transform:translateY(0);}
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <h2>👑 Premium Menü</h2>
+    <div>
+        <button onclick="login('admin')">Admin</button>
+        <button onclick="login('user')">Müşteri</button>
+        <button onclick="showCart()">Sepet</button>
+    </div>
+</header>
+
+<div class="points">⭐ Puan: <span id="puan">0</span></div>
+
+<div class="container" id="menu"></div>
+
+<script>
+let userType = "guest";
+let points = 0;
+let cart = [];
+
+// MENÜ + GÖRSELLER
+let menuData = {
+    "Yemekler": [
+        {id:1, name:"Adana Kebap", price:150, img:"https://i.lezzet.com.tr/images-xxlarge/adana-kebap-tarifi-387f3bc0-9ba7-4162-b9a8-e82273369683"},
+        {id:2, name:"Lahmacun", price:80, img:"https://i.lezzet.com.tr/images-xxlarge-recipe/firinda-lahmacun-44438684-04e2-47bf-995c-712f4028db3f.jpg"},
+        {id:3, name:"Avokado Yatağında Tavuk", price:180, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGfR281MY8ClHskOdmVprOosb_9KzvCtibiw&s"}
+    ],
+    "Çorbalar": [
+        {id:4, name:"Mercimek Çorbası", price:60, img:"https://i.lezzet.com.tr/images-xxlarge-recipe/unsuz-mercimek-corbasi-4e0cfce9-1781-467c-90d8-58171f83530b.jpg"},
+        {id:5, name:"Domates Çorbası", price:70, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWGs0e3JxEmLOrJYgJBBkkCuQyGlaABE36IA&s"},
+        {id:6, name:"Mısır Çorbası", price:75, img:"https://www.unileverfoodsolutions.com.tr/dam/global-ufs/mcos/TURKEY/calcmenu/recipes/TR-recipes/general/lahanal%C4%B1-m%C4%B1s%C4%B1r-%C3%A7orbas%C4%B1/preview.jpg"}
+    ],
+    "İçecekler": [
+        {id:7, name:"Kola", price:30, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRymiaR9p8D2qHB2bGw2ao6RO5sM8VY-ACrkg&s"},
+        {id:8, name:"Ayran", price:25, img:"https://www.lengeret.com/tema/genel/uploads/urunler/acikayran.jpg"}
+    ],
+    "Alkollü": [
+        {id:9, name:"Rakı", price:250, img:"https://static.wixstatic.com/media/e754f8_bc63ba86c7e944488cdbd793898a8ba0~mv2.jpg/v1/fill/w_568,h_568,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/e754f8_bc63ba86c7e944488cdbd793898a8ba0~mv2.jpg"},
+        {id:10, name:"Viski", price:300, img:"https://tr.nudeglass.com/cdn/shop/products/duzenlemeler_0000_Lifestyle_-_Arch_Whisky_Glass_-_22153_-_1049891.jpg?v=1571709551"},
+        {id:11, name:"Votka", price:220, img:"https://static.birgun.net/resim/haber/2025/01/06/votka-fiyatlari-2025-guncel.png"}
+    ]
+};
+
+// LOGIN
+function login(type){
+    userType = type;
+    alert(type === "admin" ? "Admin giriş" : "Müşteri giriş - Puan kazanırsın ⭐");
+}
+
+// MENÜ
+function loadMenu(){
+    const container = document.getElementById("menu");
+    container.innerHTML = "";
+
+    for(let category in menuData){
+        container.innerHTML += `<div class="category fade-in"><h2>${category}</h2></div>`;
+
+        menuData[category].forEach(item=>{
+            container.innerHTML += `
+            <div class="card fade-in">
+                <img src="${item.img}">
+                <div class="card-content">
+                    <h3>${item.name}</h3>
+                    <p class="price">${item.price}₺</p>
+
+                    <input id="r${item.id}" placeholder="Çıkartılacak malzemeler">
+                    <textarea id="n${item.id}" placeholder="Not"></textarea>
+
+                    <button onclick="addToCart(${item.id}, ${item.price}, '${item.name}')">
+                        Sepete Ekle
+                    </button>
+                </div>
+            </div>`;
+        });
+    }
+}
+
+// SEPET
+function addToCart(id, price, name){
+    let removed = document.getElementById("r"+id).value;
+    let note = document.getElementById("n"+id).value;
+
+    cart.push({id, price, name, removed, note});
+    alert("Sepete eklendi");
+}
+
+// SEPET
+function showCart(){
+    let text = "🛒 SEPET\n\n";
+    cart.forEach(c=> text += `${c.name} - ${c.price}₺\n`);
+
+    if(confirm(text + "\nSipariş ver?")){
+        completeOrder();
+    }
+}
+
+// SİPARİŞ
+function completeOrder(){
+    cart.forEach(c=>{
+        points += Math.floor(c.price/10);
+    });
+
+    document.getElementById("puan").innerText = points;
+    alert("Sipariş tamamlandı ⭐");
+    cart = [];
+}
+
+// INIT
+loadMenu();
+</script>
+
+</body>
+</html>
